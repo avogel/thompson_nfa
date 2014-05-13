@@ -17,20 +17,22 @@
 |#
 
 (define (match:any . match-combinators)
-  (define (any-match data dictionary succeed)
-    (and (pair? data)
-	 (let lp ((data data)
-		  (matchers match-combinators)
-		  (dictionary dictionary))
-	   (cond ((pair? matchers)
-		  (or ((car matchers)
-		       data
-		       dictionary
-		       succeed)
-		      (lp data
-			  (cdr matchers)
-			  dictionary)))
-		 (else #f)))))
+  (define (any-match network outer-start-node end-node)
+    (let lp ((matchers match-combinators)
+	     (start-node outer-start-node))
+      (cond ((pair? (cdr matchers))
+	     (let ((intermediate (new-node network)))
+	       ((car matchers) network start-node intermediate)
+	       (lp (cdr matchers)
+		   intermediate)))
+	    ((null? (cdr matchers))
+	     ((car matchers) network start-node outer-start-node))
+	    ((null? matchers)
+	     network)))
+    (add-edge network
+	      outer-start-node
+	      end-node
+	      (lambda (data) #t)))
   any-match)
 
 (define (match:pattern-list pattern) (cdr pattern))
@@ -45,28 +47,24 @@
 #|
 ;;;test cases for any match:->combinators
 
-((match:->combinators
-  `(?:any a b (? x) c))
- `(z)
- `()
- (lambda (d n) `(succeed ,d)))
-;Value: (succeed ((x z)))
+(match:maker 
+ (new-network `(?:any a b c))
+ `(a b c))
+;Value: #t
 
-((match:->combinators
-  `((? y) (?:any a b (? x ,string?) (? y ,symbol?) c)))
- `((z z))
- `()
- (lambda (d n) `(succeed ,d)))
-;Value: (succeed ((y z)))
+(match:maker 
+ (new-network `(?:any a b c))
+ `())
+;Value: #t
 
-((match:->combinators
-  `(?:any b (? x ,symbol?)))
- `(b)
- `()
- (lambda (d n)
-   (pp `(succeed ,d ,n))
-   #f))
-; (succeed ())
-; (succeed ((x b)))
+(match:maker 
+ (new-network `(?:any a b c))
+ `(a b c a b c))
+;Value: #t
+
+(match:maker 
+ (new-network `(?:any a b c))
+ `(a b))
 ;Value: #f
+
 |#
