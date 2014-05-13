@@ -27,9 +27,10 @@
 (define (empty-node)
   '(node ()))
 
-(define (add-edge network start-node end-node predicate)
-  (let ((start-node (hash-table/get network start-node (empty-node))))
-    `(node ,(cons `(edge ,predicate ,end-node) (node-edges start-node)))))
+(define (add-edge network start-node-key end-node-key predicate)
+  (let ((start-node (hash-table/get network start-node-key (empty-node))))
+    (let ((new-node `(node ,(cons `(edge ,predicate ,end-node-key) (node-edges start-node)))))
+      (hash-table/put! network start-node-key new-node))))
 
 (define (node-edges node)
   (cadr node))

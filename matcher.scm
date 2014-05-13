@@ -28,7 +28,8 @@
 
 (define (eqv-predicate pattern-constant)
   (lambda (data)
-    (eqv? (car data) pattern-constant)))
+    (and (pair? data)
+	 (eqv? (car data) pattern-constant))))
 
 (define (match:list . match-combinators)
   (define (list-match network outer-start-node outer-end-node)
@@ -60,15 +61,6 @@
     (apply match:list (map match:->combinators pattern)))
   match:list?)
 
-(define (matcher pattern)
-  (let ((match-combinator (match:->combinators pattern)))
-    (lambda (datum)
-      (match-combinator (list datum)
-			'()
-			(lambda (dictionary n)
-			  (and (= n 1)
-			       dictionary))))))
-
 (define (match:maker network data)
   (let step ((probes '())
 	     )
@@ -84,8 +76,8 @@
   (let ((network (make-network)))
     ((match:->combinators pattern)
      network
-     (start-node network)
-     (end-node network))))
+     'start
+     'end)))
 
 #|
 (match:maker
