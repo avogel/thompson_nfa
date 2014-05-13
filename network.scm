@@ -34,3 +34,18 @@
 
 (define (node-edges node)
   (cadr node))
+
+(define (edge-predicate edge)
+  (cadr edge))
+
+(define (edge-destination edge)
+  (caddr edge))
+
+(define (get-node network node-key)
+  (hash-table/lookup network
+		     node-key
+		     (lambda (datum) datum)
+		     (lambda () (error 'node-does-not-exist))))
+
+
+

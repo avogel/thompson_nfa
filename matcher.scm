@@ -62,15 +62,29 @@
   match:list?)
 
 (define (match:maker network data)
-  (let step ((probes '())
-	     )
-    (let lp ((probes-left probes)
-	     (new-probes '())
-	     )
-      (pp "get node of current probe")
-      (pp "check node edges against car data")
-      (pp "add new probe for each edge match")
-      )))
+  (let step ((probes '(start))
+	     (data data))
+    (cond ((memq 'end probes)
+	   #t)
+	  ((not (pair? data))
+	   #f)
+	  (else
+	   (let probe-loop ((probes-left probes)
+			    (new-probes '())
+			    )
+	     (cond ((pair? probes-left)
+		    (let edge-loop ((edges (node-edges (get-node network (car probes-left))))
+				    (edge-new-probes new-probes))
+		      (cond ((pair? edges)
+			     (if ((edge-predicate (car edges)) data)
+				 (edge-loop (cdr edges)
+					    (cons (edge-destination (car edges))
+						  edge-new-probes))
+				 (edge-loop (cdr edges) edge-new-probes)))
+			    (else
+			     (probe-loop (cdr probes-left) edge-new-probes)))))
+		   (else
+		    (step new-probes (cdr data)))))))))
 
 (define (new-network pattern)
   (let ((network (make-network)))
@@ -81,8 +95,53 @@
 
 #|
 (match:maker
- (new-network `(?:choice a b c))
+ (new-network `(a))
  `(a))
 ;Value: #t
+
+(match:maker
+ (new-network `(a))
+ `())
+;Value: #f
+
+(match:maker
+ (new-network `(a))
+ `(a b))
+;Value: #t
+
+(match:maker
+ (new-network `(a))
+ `(b))
+;Value: #f
+
+(match:maker
+ (new-network `(a))
+ `(b a))
+;Value: #f
+
+(match:maker
+ (new-network `(a b c))
+ `(a b c))
+;Value: #t
+
+(match:maker
+ (new-network `(a b c))
+ `())
+;Value: #f
+
+(match:maker
+ (new-network `(a b c))
+ `(a b))
+;Value: #f
+
+(match:maker
+ (new-network `(a b))
+ `(a b c))
+;Value: #t
+
+(match:maker
+ (new-network `(a b c))
+ `(a b d))
+;Value: #f
 |#
 
