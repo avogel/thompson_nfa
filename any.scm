@@ -32,7 +32,8 @@
     (add-edge network
 	      outer-start-node
 	      end-node
-	      (lambda (data) #t)))
+	      (lambda (data) #t))
+    network)
   any-match)
 
 (define (match:pattern-list pattern) (cdr pattern))
@@ -47,6 +48,47 @@
 #|
 ;;;test cases for any match:->combinators
 
+(define any-abc (new-network `(?:any a b c)))
+
+(start-node any-abc)
+;Value 24: (node ((edge #[compound-procedure 25] end) (edge #[compound-procedure 26] 2)))
+
+
+(define start-edges (node-edges (start-node any-abc)))
+((edge-predicate (cadr start-edges)) '(a b c))
+;Value: #t
+((edge-predicate (cadr start-edges)) '(a))
+;Value: #t
+((edge-predicate (cadr start-edges)) '(b))
+;Value: #f
+((edge-predicate (cadr start-edges)) '(a c))
+;Value: #t
+
+(define second-node (get-node any-abc (edge-destination (cadr abc-edges))))
+(define second-node-edges (node-edges second-node))
+((edge-predicate (car second-node-edges)) '(b))
+;Value: #t
+((edge-predicate (car second-node-edges)) '(c))
+;Value: #f
+((edge-predicate (car second-node-edges)) '(b c))
+;Value: #t
+((edge-predicate (car second-node-edges)) '(a))
+;Value: #f
+
+(define third-node (get-node any-abc (edge-destination (car second-node-edges))))
+(define third-node-edges (node-edges third-node))
+((edge-predicate (car third-node-edges)) '(a))
+;Value: #f
+((edge-predicate (car third-node-edges)) '(c a))
+;Value: #t
+
+(edge-destination (car third-node-edges))
+;Value: start
+
+(define start (start-node any-abc))
+(define first-edge-out-of-start (car (node-edges start)))
+((edge-predicate first-edge-out-of-start) '())
+
 (match:maker 
  (new-network `(?:any a b c))
  `(a b c))
@@ -55,16 +97,16 @@
 (match:maker 
  (new-network `(?:any a b c))
  `())
-;Value: #t
+;Value: #f
 
 (match:maker 
  (new-network `(?:any a b c))
- `(a b c a b c))
+ `(a b c d a b c d))
 ;Value: #t
 
 (match:maker 
  (new-network `(?:any a b c))
  `(a b))
-;Value: #f
+;Value: #t
 
 |#
