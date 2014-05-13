@@ -18,35 +18,33 @@
 ;;; Primitive match procedures:
 
 (define (match:eqv pattern-constant)
-  (define (eqv-match data dictionary succeed)
-    (and (pair? data)
-	 (eqv? (car data) pattern-constant)
-	 (succeed dictionary 1)))
+  (define (eqv-match network start-node end-node)
+    (add-edge network
+	      start-node
+	      end-node
+	      (eqv-predicate pattern-constant))
+    network)
   eqv-match)
 
+(define (eqv-predicate pattern-constant)
+  (lambda (data)
+    (eqv? (car data) pattern-constant)))
+
 (define (match:list . match-combinators)
-  (define (list-match data dictionary succeed)
-    (and (pair? data)
-	 (let lp ((lst (car data))
-		  (matchers match-combinators)
-		  (dictionary dictionary))
-	   (cond ((pair? matchers)
-		  ((car matchers)
-		   lst
-		   dictionary
-		   (lambda (new-dictionary n)
-		     (if (> n (length lst))
-			 (error "Matcher ate too much."
-				n))
-		     (lp (list-tail lst n)
-			 (cdr matchers)
-			 new-dictionary))))
-		 ((pair? lst) #f)
-		 ((null? lst)
-		  (succeed dictionary 1))
-		 (else #f)))))
+  (define (list-match network outer-start-node outer-end-node)
+    (let lp ((matchers match-combinators)
+	     (start-node outer-start-node))
+      (cond ((pair? (cdr matchers))
+	     (let ((intermediate (new-node network)))
+	       ((car matchers) network start-node intermediate)
+	       (lp (cdr matchers)
+		   intermediate)))
+	    ((null? (cdr matchers))
+	     ((car matchers) network start-node outer-end-node))
+	    ((null? matchers)
+	     network))))
   list-match)
-
+
 ;;; Syntax of matching is determined here.
 
 (define (match:list? pattern)
@@ -70,3 +68,29 @@
 			(lambda (dictionary n)
 			  (and (= n 1)
 			       dictionary))))))
+
+(define (match:maker network data)
+  (let step ((probes '())
+	     )
+    (let lp ((probes-left probes)
+	     (new-probes '())
+	     )
+      (pp "get node of current probe")
+      (pp "check node edges against car data")
+      (pp "add new probe for each edge match")
+      )))
+
+(define (new-network pattern)
+  (let ((network (make-network)))
+    ((match:->combinators pattern)
+     network
+     (start-node network)
+     (end-node network))))
+
+#|
+(match:maker
+ (new-network `(?:choice a b c))
+ `(a))
+;Value: #t
+|#
+
