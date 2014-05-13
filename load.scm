@@ -4,7 +4,7 @@
 
 (load "ghelper")
 (load "matcher")
-(load "node")
+(load "network")
 
 (load "choice")
 (load "optional")
