@@ -1,67 +1,51 @@
-;;;; Matcher based on match combinators, CPH/GJS style.
-;;;     Idea is in Hewitt's PhD thesis (1969).
+;;;; Preston Thompson and Ari Vogel
+;;;; Matcher
+;;;; May 5 2014
 
 (declare (usual-integrations))
 
-;;; There are match procedures that can be applied to data items.  A
-;;; match procedure either accepts or rejects the data it is applied
-;;; to.  Match procedures can be combined to apply to compound data
-;;; items.
+;;; These are match procedures that create a Thompson NFA network.
+;;; When data is applied to the network, the algorithm will track the
+;;; progression through the network as it steps through the data, and
+;;; will be considered a success if it reaches the end state of the
+;;; network without running out of data.
 
-;;; A match procedure takes a list containing a data item, a
-;;; dictionary, and a success continuation.  The dictionary
-;;; accumulates the assignments of match variables to values found in
-;;; the data.  The success continuation takes two arguments: the new
-;;; dictionary, and the number of items absorbed from the list by the
-;;; match.  If a match procedure fails it returns #f.
+;;; A match procedure takes a network, a start node, and an end node.
+;;; The match procedure will add the correct nodes and edges to the
+;;; network to connect the start node and end node according to the
+;;; particular type of the match procedure. The match procedure then
+;;; returns the updated network.
 
-;;; Primitive match procedures:
-
+;;; returns a match combinator that will create a network
+;;; from start-node to end-node where the data must match
+;;; the pattern constant
 (define (match:eqv pattern-constant)
   (define (eqv-match network start-node end-node)
     (add-edge network
 	      start-node
 	      end-node
-	      (eqv-predicate pattern-constant)
-	      #f)
+	      (eqv-predicate pattern-constant))
     network)
   eqv-match)
 
+;;; returns an edge predicate where the first element of data
+;;; must match pattern-constant for the predicate to be true
 (define (eqv-predicate pattern-constant)
-  (lambda (data step-expand?)
+  (lambda (data step-expand)
     (and (pair? data)
 	 (eqv? (car data) pattern-constant))))
 
-(define (match:list . match-combinators)
-  (define (list-match network outer-start-node outer-end-node)
-    (let lp ((matchers match-combinators)
-	     (start-node outer-start-node))
-      (cond ((pair? (cdr matchers))
-	     (let ((intermediate (new-node network)))
-	       ((car matchers) network start-node intermediate)
-	       (lp (cdr matchers)
-		   intermediate)))
-	    ((null? (cdr matchers))
-	     ((car matchers) network start-node outer-end-node))
-	    ((null? matchers)
-	     network))))
-  list-match)
-
-;;; Syntax of matching is determined here.
-
-(define (match:list? pattern)
-  (and (list? pattern)
-       (or (null? pattern)
-	   (not (memq (car pattern) '(?:choice ?:optional ?:any ?:plus))))))
-
+;;; makes the match:->combinators generic operator that will
+;;; be implemented for various pattern types
 (define match:->combinators
   (make-generic-operator 1 'eqv match:eqv))
 
-(defhandler match:->combinators
-  (lambda (pattern)
-    (apply match:list (map match:->combinators pattern)))
-  match:list?)
+;;; The items below run the step loop that will apply a network
+;;; created by match:->combinators and determine whether it
+;;; matches data
 
+;;; applies the data to the network
+;;; returns true if it matches, false otherwise
 (define (match:maker network data)
   (let step ((probes '(start))
 	     (data data))
@@ -89,6 +73,7 @@
 		   (else
 		    (step new-probes (cdr data)))))))))
 
+;;; expands all the probes as far as possible down empty edges
 (define (depth-expand network probes)
   (let probe-loop ((probes-left probes)
 		   (new-probes '()))
@@ -97,14 +82,8 @@
 		       (depth-expand-probe network (car probes-left) new-probes)))
 	  (else (append! probes (unique new-probes))))))
 
-;;; taken from http://stackoverflow.com/a/17413712
-(define (unique lst)
-  (let loop ((lst lst) (res '()))
-    (if (not (pair? lst))
-        (reverse res)
-        (let ((c (car lst)))
-          (loop (cdr lst) (if (member c res) res (cons c res)))))))
-
+;;; expands a probe as far as possible down empty edges and returns a list of the
+;;; resulting probes
 (define (depth-expand-probe network probe the-probes)
   (let edge-loop ((edges (node-edges (get-node network probe)))
 		  (expanded-probes the-probes))
@@ -115,23 +94,24 @@
 		(depth-expand-probe
 		 network
 		 (edge-destination (car edges))
-		 (cons (edge-destination (car edges)) expanded-probes)
-		 ;(if (edge-leave-probe? (car edges))
-		 ;    (cons (edge-destination (car edges)) expanded-probes)
-		 ;    (cons (edge-destination (car edges))
-			   ;(cdr expanded-probes)))
-		)
+		 (cons (edge-destination (car edges)) expanded-probes))
 		expanded-probes)))
 	  (else expanded-probes))))
 
-(define (new-network pattern)
-  (let ((network (make-network)))
-    ((match:->combinators pattern)
-     network
-     'start
-     'end)))
+;;; returns a list without any repeating elements
+;;; taken from http://stackoverflow.com/a/17413712
+(define (unique lst)
+  (let loop ((lst lst) (res '()))
+    (if (not (pair? lst))
+        (reverse res)
+        (let ((c (car lst)))
+          (loop (cdr lst) (if (member c res) res (cons c res)))))))
+
+
 
 #|
+;;; examples
+
 (match:maker
  (new-network `(a))
  `(a))

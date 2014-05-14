@@ -1,3 +1,5 @@
+;;;; Taken from Problem Set 3
+
 ;;;;           Most General Generic-Operator Dispatch
 
 (declare (usual-integrations))

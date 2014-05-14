@@ -23,8 +23,7 @@
        start-node
        end-node
        (lambda (data step-expand) 
-	 (not step-expand))
-       #t)
+	 (not step-expand)))
       connected-network))
   optional-match)
 
@@ -67,52 +66,6 @@
  (new-network `(b (?:optional a) c))
  `(b d c))
 ;Value: #f
-
-|#
-
-#|
-((match:->combinators
-  `((?:optional a) a))
- `((a a))
- `()
- (lambda (d n)
-   (pp `(succeed ,d ,n))
-   #f))
-(succeed () 1)
-;Value: #f
-
-((match:->combinators
-  `((?:optional b) a))
- `((b a))
- `()
- (lambda (d n)
-   (pp `(succeed ,d ,n))
-   #f))
-(succeed () 1)
-;Value: #f
-
-((match:->combinators
-  `((?:optional b) a))
- `((a))
- `()
- (lambda (d n)
-   (pp `(succeed ,d ,n))
-   #f))
-(succeed () 1)
-;Value: #f
-
-(define pattern `(,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o ,o a a a a a a a a a a a a a a a a a a a a a a))
-;Value: pattern
-
-((match:->combinators pattern)
- `((a a a a a a a a a a a a a a a a a a a a a a))
- `()
- (lambda (d n)
-   (pp `(succeed ,d ,n))
-   #f))
-(succeed () 1)
-;Value: #f
-; took 3 minutes 15 seconds
 
 |#
 

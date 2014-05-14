@@ -33,8 +33,7 @@
 	      outer-start-node
 	      end-node
 	      (lambda (data step-expand) 
-		(not step-expand))
-	      #t)
+		(not step-expand)))
     network)
   any-match)
 

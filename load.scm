@@ -6,6 +6,7 @@
 (load "matcher")
 (load "network")
 
+(load "list")
 (load "choice")
 (load "optional")
 (load "any")
