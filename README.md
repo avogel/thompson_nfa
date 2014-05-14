@@ -13,3 +13,8 @@ a predicate takes in one argument which is data, and returns whether the edge sh
 a blank edge has #t has its predicate, and thus will return true for an argument containing no data (the only such predicate)
 at the end of step loop, spawn new probes along all blank edges recursively.
 when adding new combinator, first node is the previous end node.
+
+for blank edges:
+two flags are required, leave-probe and expand-on-step
+leave-probe indicates if a probe should be left on the source node when a blank edge is followed
+expand-on-step indicates if a blank edge should be followed during the step loop of match:maker
