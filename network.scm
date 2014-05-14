@@ -35,9 +35,9 @@
 (define (empty-node)
   '(node ()))
 
-(define (add-edge network start-node-key end-node-key predicate leave-probe?)
+(define (add-edge network start-node-key end-node-key predicate)
   (let ((start-node (hash-table/get network start-node-key (empty-node))))
-    (let ((new-node `(node ,(cons `(edge ,predicate ,end-node-key ,leave-probe?)
+    (let ((new-node `(node ,(cons `(edge ,predicate ,end-node-key)
 				  (node-edges start-node)))))
       (hash-table/put! network start-node-key new-node))))
 
@@ -50,14 +50,18 @@
 (define (edge-destination edge)
   (caddr edge))
 
-(define (edge-leave-probe? edge)
-  (cadddr edge))
-
 (define (get-node network node-key)
   (hash-table/lookup network
 		     node-key
 		     (lambda (datum) datum)
 		     (lambda () (error 'node-does-not-exist-with-key node-key))))
+
+
+
+
+
+
+
 
 
 

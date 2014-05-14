@@ -1,16 +1,6 @@
 ;;;; Preston Thompson and Ari Vogel
-;;;; Node
+;;;; Network Tests
 ;;;; May 13 2014
-
-
-#|
-;;; makes and returns a network
-(define (make-network)
-  (let ((network (make-eq-hash-table)))
-    (hash-table/put! network 'end (empty-node))
-    (hash-table/put! network 'start (empty-node))
-    network))
-|#
 
 
 (define net (make-network))
@@ -20,32 +10,28 @@
 (eqv? (hash-table/get net 'end 'doesnotexist) (empty-node))
 ;Value: #t
 
-#|
-;;; adds the node to network and returns the node's key
-(define (add-node network node)
-  (let ((key (hash-table/count network)))
-    (hash-table/put! network key node)
-    key))
-|#
+(start-node net)
+;Value: (node ())
 
-(define test-node-1 `(node ((edge #t start))))
+(end-node net)
+;Value: (node ())
 
+(define test-node-1 `(node ((edge (lambda (data step-expand) #t)
+				  end)
+			    (edge (lambda (data step-expand)
+				    (eqv? (car data) 'c))
+				  start))))
 (pp test-node-1)
-;(node ((edge #t start)))
+;(node
+; ((edge (lambda (data step-expand) #t) end)
+;  (edge (lambda (data step-expand) (eqv? (car data) 'c)) start)))
 
 (add-node net test-node-1)
 ;Value: 2
 
 (hash-table/get net 2 'doesnotexist)
-;Value 16: (node ((edge #t start)))
+;Value 25: (node ((edge (lambda (data step-expand) #t) end) (edge (lambda (data step-expand) (eqv? (car data) (quote c))) start)))
 
-#|
-(define (new-node network)
-  (add-node network (empty-node)))
-
-(define (empty-node)
-  '(node ()))
-|#
 
 (define empty (empty-node))
 (list? empty)
@@ -56,15 +42,30 @@
 ; Value: #t
 
 
-(define (add-edge network start-node end-node predicate)
-  (let ((start-node (hash-table/get network start-node (empty-node))))
-    `(node ,(cons `(edge ,predicate ,end-node) (node-edges start-node)))))
+(add-edge net 'start 'end 
+	  (lambda (data step-expand)
+	    #t))
 
-(define (node-edges node)
-  (cadr node))
+(pp (start-node net))
+; (node ((edge #[compound-procedure 26] end)))
 
-(define test-node-2 `(node ((edge #t start) (edge #t 2))))
-;Value: test-node-2
+((edge-predicate (car (node-edges (start-node net)))) '() #t)
+;Value: #t
 
-(node-edges test-node-2)
-;Value 19: ((edge #t start) (edge #t 2))
+
+(add-edge net 'start 2
+	  (lambda (data step-expand)
+	    (eqv? (car data) 'a)))
+
+((edge-predicate (car (node-edges (start-node net)))) '(a) #f)
+;Value: #t
+
+((edge-predicate (car (node-edges (start-node net)))) '(b) #f)
+;Value: #f
+
+(node-edges (start-node net))
+;Value 27: ((edge #[compound-procedure 28] 2) (edge #[compound-procedure 26] end))
+
+
+(node-edges (get-node net 2))
+;Value 29: ((edge (lambda (data step-expand) #t) end) (edge (lambda (data step-expand) (eqv? (car data) (quote c))) start))

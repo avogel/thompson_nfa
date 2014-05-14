@@ -1,4 +1,4 @@
-;;;; Preston Thompson and Ari Vogel
+﻿;;;; Preston Thompson and Ari Vogel
 ;;;; Project Overview
 ;;;; May 5, 2014
 
@@ -14,6 +14,6 @@ As data is fed into the network, a 'probe' exists at a node and is progressed  t
 
 In order to implement this system, a subset of the regular expression language was chosen.  The components chosen were a single character match, concatenation of characters, multiplicities of arguments (?, * and +), and the 'or' operator.  The bulk of the new matching system can be seen in the matcher.scm file, while the individual components are created and tested in their own files (with the exception of single character and concatenation also existing in matcher.scm).
 
-Ultimately,  
+After implementing the NFA to be the pattern matching system, we ran the same experiment as earlier and it took less than a second to find the match. So we increased the number of a? and a's to be a?^100a^100 and this took between a second or two to match.  We tested extensively on the subset of the regular expression language implemented to show the success of this implementation, and the speed improvements are obvious.  Furthermore, this system is extensible, adding new components is as simple as understanding how they would be represented in an NFA, and using defhandlers to appropriately delegate work.
 
 |#
