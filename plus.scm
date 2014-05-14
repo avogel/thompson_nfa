@@ -17,21 +17,11 @@
 |#
 
 (define (match:plus . match-combinators)
-  (define (plus-match data dictionary succeed)
-    (and (pair? data)
-	 (let lp ((data data)
-		  (matchers match-combinators)
-		  (dictionary dictionary))
-	   (cond ((pair? matchers)
-		  (or ((car matchers)
-		       data
-		       dictionary
-		       succeed)
-		      (lp data
-			  (cdr matchers)
-			  dictionary)))
-		 (else #f)))))
+  (define (plus-match network start-node end-node)
+    (let ((intermediate (new-node network)))
+      ((apply match:list match-combinators) ((apply match:any match-combinators) network intermediate end-node) start-node intermediate)))
   plus-match)
+      
 
 (define (match:pattern-list pattern) (cdr pattern))
 
@@ -42,31 +32,65 @@
 		(match:pattern-list pattern))))
   match:plus?)
 
-#|
-;;;test cases for plus match:->combinators
 
-((match:->combinators
-  `(?:plus a b (? x) c))
- `(z)
- `()
- (lambda (d n) `(succeed ,d)))
-;Value: (succeed ((x z)))
+(define plus-abc (new-network `(?:plus a b c)))
 
-((match:->combinators
-  `((? y) (?:plus a b (? x ,string?) (? y ,symbol?) c)))
- `((z z))
- `()
- (lambda (d n) `(succeed ,d)))
-;Value: (succeed ((y z)))
+(match:maker 
+ (new-network `(?:plus a b c))
+ `(a b c))
+;Value: #t
 
-((match:->combinators
-  `(?:plus b (? x ,symbol?)))
- `(b)
- `()
- (lambda (d n)
-   (pp `(succeed ,d ,n))
-   #f))
-; (succeed ())
-; (succeed ((x b)))
+(match:maker 
+ (new-network `(?:plus a b c))
+ `())
 ;Value: #f
-|#
+
+(match:maker 
+ (new-network `((?:plus a b c) d))
+ `(a b c))
+;Value: #f
+
+
+(match:maker 
+ (new-network `((?:plus a b c) d))
+ `(a b c d))
+;Value: #t
+
+(match:maker 
+ (new-network `((?:plus a b c) d))
+ `(d))
+;Value: #f
+
+(match:maker 
+ (new-network `((?:plus a b c) d))
+ `(a b c a b c d))
+;Value: #t
+
+(match:maker 
+ (new-network `((?:plus a b c) d))
+ `(a b c a b c a b c d))
+;Value: #t
+
+(match:maker 
+ (new-network `((?:plus a b c) d))
+ `(a b c d a b c d))
+;Value: #t
+
+
+(match:maker 
+ (new-network `((?:plus a b c) d))
+ `(a b c s a b c d))
+;Value: #f
+
+
+
+
+
+
+
+
+
+
+
+
+
