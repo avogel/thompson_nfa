@@ -1,6 +1,6 @@
 ;;;; Preston Thompson and Ari Vogel
 ;;;; Optional
-;;;; May 5, 2014
+;;;; May 14 2014
 
 ;; `(a (?:optional ((?:choice b c) d)))
 ;;
@@ -38,33 +38,18 @@
 #|
 
 (match:maker 
- (new-network `(?:optional a b c))
+ (new-network `(a (?:optional b) c))
  `(a b c))
 ;Value: #t
 
 (match:maker 
- (new-network `(?:optional a b c))
- `())
+ (new-network `(a (?:optional b) c))
+ `(a c))
 ;Value: #t
 
 (match:maker 
- (new-network `(?:optional a b c))
- `(a b c d a b c))
-;Value: #t
-
-(match:maker 
- (new-network `(b (?:optional a) c))
- `(b a c))
-;Value: #t
-
-(match:maker 
- (new-network `(b (?:optional a) c))
- `(b c))
-;Value: #t
-
-(match:maker 
- (new-network `(b (?:optional a) c))
- `(b d c))
+ (new-network `(a (?:optional b) c))
+ `(a d c))
 ;Value: #f
 
 |#

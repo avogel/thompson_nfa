@@ -1,6 +1,6 @@
 ;;;; Preston Thompson and Ari Vogel
 ;;;; Choice
-;;;; May 5, 2014
+;;;; May 14 2014
 
 (define (match:choice? pattern)
   (and (pair? pattern)
@@ -17,20 +17,13 @@
 |#
 
 (define (match:choice . match-combinators)
-  (define (choice-match data dictionary succeed)
-    (and (pair? data)
-	 (let lp ((data data)
-		  (matchers match-combinators)
-		  (dictionary dictionary))
-	   (cond ((pair? matchers)
-		  (or ((car matchers)
-		       data
-		       dictionary
-		       succeed)
-		      (lp data
-			  (cdr matchers)
-			  dictionary)))
-		 (else #f)))))
+  (define (choice-match network start-node end-node)
+    (let lp ((matchers match-combinators))
+      (cond ((pair? matchers)
+	     (begin
+	       ((car matchers) network start-node end-node)
+	       (lp (cdr matchers))))
+	    (else network))))
   choice-match)
 
 (define (match:pattern-list pattern) (cdr pattern))
@@ -43,30 +36,35 @@
   match:choice?)
 
 #|
-;;;test cases for choice match:->combinators
+;;;test cases for choice
 
-((match:->combinators
-  `(?:choice a b (? x) c))
- `(z)
- `()
- (lambda (d n) `(succeed ,d)))
-;Value: (succeed ((x z)))
-
-((match:->combinators
-  `((? y) (?:choice a b (? x ,string?) (? y ,symbol?) c)))
- `((z z))
- `()
- (lambda (d n) `(succeed ,d)))
-;Value: (succeed ((y z)))
-
-((match:->combinators
-  `(?:choice b (? x ,symbol?)))
- `(b)
- `()
- (lambda (d n)
-   (pp `(succeed ,d ,n))
-   #f))
-; (succeed ())
-; (succeed ((x b)))
+(match:maker 
+ (new-network `(?:choice a b c))
+ `())
 ;Value: #f
+
+(match:maker 
+ (new-network `(?:choice a b c))
+ `(a))
+;Value: #t
+
+(match:maker 
+ (new-network `(?:choice a b c))
+ `(b))
+;Value: #t
+
+(match:maker 
+ (new-network `(?:choice a b c))
+ `(c))
+;Value: #t
+
+(match:maker 
+ (new-network `(?:choice (a d) b c))
+ `(a))
+;Value: #f
+
+(match:maker 
+ (new-network `(?:choice (a d) b c))
+ `(a d))
+;Value: #t
 |#

@@ -1,6 +1,6 @@
 ;;;; Preston Thompson and Ari Vogel
 ;;;; Any
-;;;; May 5, 2014
+;;;; May 14 2014
 
 (define (match:any? pattern)
   (and (pair? pattern)
@@ -91,24 +91,28 @@
 ((edge-predicate first-edge-out-of-start) '() #t)
 
 (match:maker 
- (new-network `(?:any a b c))
- `(a b c))
+ (new-network `(a (?:any b c) d))
+ `(a d))
 ;Value: #t
 
 (match:maker 
- (new-network `(?:any a b c))
- `())
-;Value: #t
+ (new-network `(a (?:any b c) d))
+ `(a b d))
+;Value: #f
 
 (match:maker 
- (new-network `(?:any a b c))
- `(a b c d a b c d))
+ (new-network `(a (?:any b c) d))
+ `(a b c d))
 ;Value: #t
 
-(match:maker 
- (new-network `(?:any a b c))
- `(a b))
+(match:maker
+ (new-network `(a (?:any b c) d))
+ `(a b c b c b c d))
 ;Value: #t
 
+(match:maker
+ (new-network `(a (?:any b c) d))
+ `(a b c b c b c b d))
+;Value: #f
 |#
 

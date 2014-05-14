@@ -1,6 +1,6 @@
 ;;; Preston Thompson and Ari Vogel
 ;;; List
-;;; May 12 2014
+;;; May 14 2014
 
 ;;; returns true if the pattern is a list pattern
 (define (match:list? pattern)
@@ -31,3 +31,32 @@
     (apply match:list (map match:->combinators pattern)))
   match:list?)
 
+#|
+;;; match:list examples
+
+(match:maker
+ (new-network `(a b c))
+ `(a b c))
+;Value: #t
+
+(match:maker
+ (new-network `(a b c))
+ `())
+;Value: #f
+
+(match:maker
+ (new-network `(a b c))
+ `(a b))
+;Value: #f
+
+(match:maker
+ (new-network `(a b))
+ `(a b c))
+;Value: #t
+
+(match:maker
+ (new-network `(a b c))
+ `(a b d))
+;Value: #f
+
+|#

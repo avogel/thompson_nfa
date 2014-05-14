@@ -1,6 +1,6 @@
 ;;;; Preston Thompson and Ari Vogel
 ;;;; Tests for matcher.scm
-;;;; May 13 2014
+;;;; May 14 2014
 
 ;;; test cases for eqv-predicate
 ((eqv-predicate 'a) '(a b c))
@@ -23,5 +23,20 @@
     ((match:eqv 1) network 'start new-node)
     (hash-table/get network 'start 'doesntexist)))
 ;Value: (node ((edge #[compound-procedure XX] 2)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

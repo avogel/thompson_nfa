@@ -1,6 +1,6 @@
 ;;;; Preston Thompson and Ari Vogel
 ;;;; Matcher
-;;;; May 5 2014
+;;;; May 14 2014
 
 (declare (usual-integrations))
 
@@ -50,6 +50,7 @@
   (let step ((probes '(start))
 	     (data data))
     (depth-expand network probes)
+    (pp (unique probes))
     (cond ((memq 'end probes)
 	   #t)
 	  ((not (pair? data))
@@ -110,7 +111,7 @@
 
 
 #|
-;;; examples
+;;; match:eqv examples
 
 (match:maker
  (new-network `(a))
@@ -137,30 +138,6 @@
  `(b a))
 ;Value: #f
 
-(match:maker
- (new-network `(a b c))
- `(a b c))
-;Value: #t
-
-(match:maker
- (new-network `(a b c))
- `())
-;Value: #f
-
-(match:maker
- (new-network `(a b c))
- `(a b))
-;Value: #f
-
-(match:maker
- (new-network `(a b))
- `(a b c))
-;Value: #t
-
-(match:maker
- (new-network `(a b c))
- `(a b d))
-;Value: #f
 |#
 
 

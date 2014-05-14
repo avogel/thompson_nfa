@@ -1,6 +1,6 @@
 ;;;; Preston Thompson and Ari Vogel
-;;;; plus
-;;;; May 5, 2014
+;;;; Plus
+;;;; May 14 2014
 
 (define (match:plus? pattern)
   (and (pair? pattern)
