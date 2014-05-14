@@ -89,7 +89,7 @@
 
 (define start (start-node any-abc))
 (define first-edge-out-of-start (car (node-edges start)))
-((edge-predicate first-edge-out-of-start) '())
+((edge-predicate first-edge-out-of-start) '() #t)
 
 (match:maker 
  (new-network `(?:any a b c))

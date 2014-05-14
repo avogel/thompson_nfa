@@ -89,7 +89,31 @@
 		    (step new-probes (cdr data)))))))))
 
 (define (depth-expand network probes)
-  )
+  (let probe-loop ((probes-left probes)
+		   (new-probes '()))
+    (cond ((pair? probes-left)
+	   (probe-loop (cdr probes-left)
+		       (depth-expand-probe network (car probes-left) new-probes)))
+	  (else (append! probes new-probes)))))
+
+(define (depth-expand-probe network probe the-probes)
+  (let edge-loop ((edges (node-edges (get-node network probe)))
+		  (expanded-probes the-probes))
+    (cond ((pair? edges)
+	   (edge-loop
+	    (cdr edges)
+	    (if ((edge-predicate (car edges)) '() #f)
+		(depth-expand-probe
+		 network
+		 (edge-destination (car edges))
+		 (cons (edge-destination (car edges)) expanded-probes)
+		 ;(if (edge-leave-probe? (car edges))
+		 ;    (cons (edge-destination (car edges)) expanded-probes)
+		 ;    (cons (edge-destination (car edges))
+			   ;(cdr expanded-probes)))
+		)
+		expanded-probes)))
+	  (else expanded-probes))))
 
 (define (new-network pattern)
   (let ((network (make-network)))
