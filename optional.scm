@@ -13,20 +13,19 @@
        (eq? (car pattern) '?:optional)))
 
 (define (match:optional . match-combinators)
-  (define (optional-match data-outer outer-dictionary succeed)
-    (let lp ((data data-outer)
-	     (match-combinators match-combinators)
-	     (dictionary outer-dictionary)
-	     (n 0))
-      (cond ((pair? match-combinators)
-	     (or ((car match-combinators)
-		  data
-		  dictionary
-		  (lambda (d nprime)
-		    (lp (cdr data) (cdr match-combinators)
-			d (+ n nprime))))
-		 (succeed outer-dictionary 0)))
-	    (else (succeed dictionary n)))))
+  (define (optional-match network start-node end-node)
+    (let ((connected-network ((apply match:list match-combinators)
+			     network
+			     start-node
+			     end-node)))
+      (add-edge
+       connected-network
+       start-node
+       end-node
+       (lambda (data step-expand) 
+	 (not step-expand))
+       #t)
+      connected-network))
   optional-match)
 
 (define (match:optional-combinators pattern) (cdr pattern))
@@ -36,6 +35,40 @@
     (apply match:optional
 	   (map match:->combinators (match:optional-combinators pattern))))
   match:optional?)
+
+#|
+
+(match:maker 
+ (new-network `(?:optional a b c))
+ `(a b c))
+;Value: #t
+
+(match:maker 
+ (new-network `(?:optional a b c))
+ `())
+;Value: #t
+
+(match:maker 
+ (new-network `(?:optional a b c))
+ `(a b c d a b c))
+;Value: #t
+
+(match:maker 
+ (new-network `(b (?:optional a) c))
+ `(b a c))
+;Value: #t
+
+(match:maker 
+ (new-network `(b (?:optional a) c))
+ `(b c))
+;Value: #t
+
+(match:maker 
+ (new-network `(b (?:optional a) c))
+ `(b d c))
+;Value: #f
+
+|#
 
 #|
 ((match:->combinators

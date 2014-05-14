@@ -71,11 +71,12 @@
 	  ((not (pair? data))
 	   #f)
 	  (else
-	   (let probe-loop ((probes-left probes)
+	   (let probe-loop ((probes-left (unique probes))
 			    (new-probes '())
 			    )
 	     (cond ((pair? probes-left)
-		    (let edge-loop ((edges (node-edges (get-node network (car probes-left))))
+		    (let edge-loop ((edges (node-edges (get-node network
+								 (car probes-left))))
 				    (edge-new-probes new-probes))
 		      (cond ((pair? edges)
 			     (if ((edge-predicate (car edges)) data #t)
@@ -94,7 +95,15 @@
     (cond ((pair? probes-left)
 	   (probe-loop (cdr probes-left)
 		       (depth-expand-probe network (car probes-left) new-probes)))
-	  (else (append! probes new-probes)))))
+	  (else (append! probes (unique new-probes))))))
+
+;;; taken from http://stackoverflow.com/a/17413712
+(define (unique lst)
+  (let loop ((lst lst) (res '()))
+    (if (not (pair? lst))
+        (reverse res)
+        (let ((c (car lst)))
+          (loop (cdr lst) (if (member c res) res (cons c res)))))))
 
 (define (depth-expand-probe network probe the-probes)
   (let edge-loop ((edges (node-edges (get-node network probe)))

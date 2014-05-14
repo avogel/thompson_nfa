@@ -99,7 +99,7 @@
 (match:maker 
  (new-network `(?:any a b c))
  `())
-;Value: #f
+;Value: #t
 
 (match:maker 
  (new-network `(?:any a b c))
@@ -112,3 +112,4 @@
 ;Value: #t
 
 |#
+
