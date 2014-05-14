@@ -1,6 +1,7 @@
 ﻿;;;; Preston Thompson and Ari Vogel
 ;;;; Project Overview
 ;;;; May 5, 2014
+;;;; public github repo:   github.com/hammurabbi/thompson_nfa
 
 
 #|
