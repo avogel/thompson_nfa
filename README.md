@@ -1,7 +1,9 @@
 thompson_nfa
 ============
 
-Final project for 6.945, mplementing Thompson NFA's for pattern matching
+Final project for 6.945, implementing Thompson NFA's for pattern matching.
+
+Thanks to Russ Cox and his helpful article at http://swtch.com/~rsc/regexp/regexp1.html.
 
 
 In this project, we aim to recreate the pattern matching engine to utilize Thompson nondeterministic finite automata (NFA).  Originally this project began as an extension of the match combinator system utilized in problem set 3, however upon implementing a few new features including back referencing and a multiplicity operator, we realized that the robust system made it easy to extend, and so did not provide a very interesting project.  So, we analyzed the pattern matcher used in the problem set looking for ways to improve it, and found that the current system fails to work effectively for certain combinators.  The conditions in which this pattern matching system does not perform well are situations in which large amounts of backtracking are required to find a match.  One example that we looked at was the regular expression denoted by a?^30a^30.  This regular expression can be understood as the character 'a' optionally chosen 30 times in a row followed by 30 required 'a's.  The reason this does not perform well on the current system is because a? by default chooses to eat the 'a' and if the match later fails, backtracking will change the a? to not eat the 'a'.  So, to successfully match an input of a^30, the program will first try to eat all 'a's with a?^30, then only the last a? will not eat an 'a', then two a?'s will not eat a's and so forth until eventually none of the a?'s will eat any a's and all the single character matchers will be satisfied.  This requires the traversal of an exponentially growing tree, and when we ran this with only 22 a? and a's, it took over 3 minutes to complete.  
