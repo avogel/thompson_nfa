@@ -8,7 +8,8 @@
 ;;; When data is applied to the network, the algorithm will track the
 ;;; progression through the network as it steps through the data, and
 ;;; will be considered a success if it reaches the end state of the
-;;; network without running out of data.
+;;; network. If this has not happened by the time the data has all
+;;; been consumed, it will be considered a failure.
 
 ;;; A match procedure takes a network, a start node, and an end node.
 ;;; The match procedure will add the correct nodes and edges to the

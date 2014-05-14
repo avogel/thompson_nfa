@@ -32,6 +32,7 @@
 		(match:pattern-list pattern))))
   match:plus?)
 
+#|
 
 (define plus-abc (new-network `(?:plus a b c)))
 
@@ -49,7 +50,6 @@
  (new-network `((?:plus a b c) d))
  `(a b c))
 ;Value: #f
-
 
 (match:maker 
  (new-network `((?:plus a b c) d))
@@ -76,13 +76,12 @@
  `(a b c d a b c d))
 ;Value: #t
 
-
 (match:maker 
  (new-network `((?:plus a b c) d))
  `(a b c s a b c d))
 ;Value: #f
 
-
+|#
 
 
 
