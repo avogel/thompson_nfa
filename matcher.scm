@@ -50,7 +50,7 @@
   (let step ((probes '(start))
 	     (data data))
     (depth-expand network probes)
-    (pp (unique probes))
+    ;(pp (unique probes))
     (cond ((memq 'end probes)
 	   #t)
 	  ((not (pair? data))
