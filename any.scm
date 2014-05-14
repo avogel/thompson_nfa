@@ -32,7 +32,9 @@
     (add-edge network
 	      outer-start-node
 	      end-node
-	      (lambda (data) #t))
+	      (lambda (data step-expand) 
+		(not step-expand))
+	      #t)
     network)
   any-match)
 

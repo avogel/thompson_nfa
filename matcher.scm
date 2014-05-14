@@ -22,12 +22,13 @@
     (add-edge network
 	      start-node
 	      end-node
-	      (eqv-predicate pattern-constant))
+	      (eqv-predicate pattern-constant)
+	      #f)
     network)
   eqv-match)
 
 (define (eqv-predicate pattern-constant)
-  (lambda (data)
+  (lambda (data step-expand?)
     (and (pair? data)
 	 (eqv? (car data) pattern-constant))))
 
@@ -64,6 +65,7 @@
 (define (match:maker network data)
   (let step ((probes '(start))
 	     (data data))
+    (depth-expand network probes)
     (cond ((memq 'end probes)
 	   #t)
 	  ((not (pair? data))
@@ -76,7 +78,7 @@
 		    (let edge-loop ((edges (node-edges (get-node network (car probes-left))))
 				    (edge-new-probes new-probes))
 		      (cond ((pair? edges)
-			     (if ((edge-predicate (car edges)) data)
+			     (if ((edge-predicate (car edges)) data #t)
 				 (edge-loop (cdr edges)
 					    (cons (edge-destination (car edges))
 						  edge-new-probes))
@@ -85,6 +87,9 @@
 			     (probe-loop (cdr probes-left) edge-new-probes)))))
 		   (else
 		    (step new-probes (cdr data)))))))))
+
+(define (depth-expand network probes)
+  )
 
 (define (new-network pattern)
   (let ((network (make-network)))
@@ -144,4 +149,15 @@
  `(a b d))
 ;Value: #f
 |#
+
+
+
+
+
+
+
+
+
+
+
 

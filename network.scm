@@ -9,6 +9,14 @@
     (hash-table/put! network 'start (empty-node))
     network))
 
+;;; creates a network with a pattern
+(define (new-network pattern)
+  (let ((network (make-network)))
+    ((match:->combinators pattern)
+     network
+     'start
+     'end)))
+
 ;;; adds the node to network and returns the node's key
 (define (add-node network node)
   (let ((key (hash-table/count network)))
@@ -27,9 +35,9 @@
 (define (empty-node)
   '(node ()))
 
-(define (add-edge network start-node-key end-node-key predicate)
+(define (add-edge network start-node-key end-node-key predicate leave-probe?)
   (let ((start-node (hash-table/get network start-node-key (empty-node))))
-    (let ((new-node `(node ,(cons `(edge ,predicate ,end-node-key) (node-edges start-node)))))
+    (let ((new-node `(node ,(cons `(edge ,predicate ,end-node-key ,leave-probe?) (node-edges start-node)))))
       (hash-table/put! network start-node-key new-node))))
 
 (define (node-edges node)
@@ -40,6 +48,9 @@
 
 (define (edge-destination edge)
   (caddr edge))
+
+(define (edge-leave-probe? edge)
+  (cadddr edge))
 
 (define (get-node network node-key)
   (hash-table/lookup network
