@@ -1,20 +1,17 @@
 thompson_nfa
 ============
 
-Final project for 6.945, implementing Thompson NFA's for pattern matching
+Final project for 6.945, mplementing Thompson NFA's for pattern matching
 
-Design Choices:
 
-a network is a hash table, where entries are nodes, and the key for a node will be an index number.
-a node is a tagged list, (node . edges)
-an edge is a tagged list, (edge predicate next-node-key)
+In this project, we aim to recreate the pattern matching engine to utilize Thompson nondeterministic finite automata (NFA).  Originally this project began as an extension of the match combinator system utilized in problem set 3, however upon implementing a few new features including back referencing and a multiplicity operator, we realized that the robust system made it easy to extend, and so did not provide a very interesting project.  So, we analyzed the pattern matcher used in the problem set looking for ways to improve it, and found that the current system fails to work effectively for certain combinators.  The conditions in which this pattern matching system does not perform well are situations in which large amounts of backtracking are required to find a match.  One example that we looked at was the regular expression denoted by a?^30a^30.  This regular expression can be understood as the character 'a' optionally chosen 30 times in a row followed by 30 required 'a's.  The reason this does not perform well on the current system is because a? by default chooses to eat the 'a' and if the match later fails, backtracking will change the a? to not eat the 'a'.  So, to successfully match this, the program will first try to eat all 'a's with a?^30, then only the last a? will not eat an 'a', then two a?'s will not eat a's and so forth until eventually none of the a?'s will eat any a's and all the single character matchers will be satisfied.  This requires the traversal of an exponentially growing tree, and when we ran this with only 22 a? and a's, it took over 3 minutes to complete.  
 
-a predicate takes in one argument which is data, and returns whether the edge should be traversed.
-a blank edge has #t has its predicate, and thus will return true for an argument containing no data (the only such predicate)
-at the end of step loop, spawn new probes along all blank edges recursively.
-when adding new combinator, first node is the previous end node.
+So, we searched for solutions to this problem and found Thompson NFA's. This essentially is a system in which a state machine is created to represent the regular expression, then the data is fed into the state machine and if the final 'matching' state is reached.  The difference between an NFA and traditional finite automata, is the removal for the need to backtrack by stepping to both potential states at a fork instead of choosing one.  The reason this paradigm can eliminate the exponential seen in the example above, is because exactly one state per data character in the regular expression.  So, the number of states in the generated NFA is no more than the length of the regular expression which created the NFA. 
 
-for blank edges:
-two flags are required, leave-probe and expand-on-step
-leave-probe indicates if a probe should be left on the source node when a blank edge is followed
-expand-on-step indicates if a blank edge should be followed during the step loop of match:maker
+The general approach to this problem is to use generic operators to create an NFA from a regular expression similar to how the system in problem set 3 created match combinators which where applied to data.  We represent an NFA as a network of nodes and edges.  Nodes are stored in a hashtable, with a special start and end node and other nodes are denoted by an integer key.  The value stored in the hash table for a node is a list of edges out of the given node.  Edges are represented as a tagged list with a predicate to check if the edge should be traversed, and a destination node to denote the next step given that the predicate returns true on the input data. 
+
+As data is fed into the network, a 'probe' exists at a node and is progressed  to all nodes for which the predicate of an outbound edge is satisfied by the next character in the data.  So, the set of probes currently in the network represent possible ways in which the NFA is attempting to match the data.  If an edge predicate is not satisfied, then the probe is removed from the NFA.  If any probe reaches the 'end' node, then the system returns that there has been a successful match, and if all data is eaten without a probe reaching the 'end' then the NFA could not match the data, so false is returned.
+
+In order to implement this system, a subset of the regular expression language was chosen.  The components chosen were a single character match, concatenation of characters, multiplicities of arguments (?, * and +), and the 'or' operator.  The bulk of the new matching system can be seen in the matcher.scm file, while the individual components are created and tested in their own files (with the exception of single character and concatenation also existing in matcher.scm).
+
+After implementing the NFA to be the pattern matching system, we ran the same experiment as earlier and it took less than a second to find the match. So we increased the number of a? and a's to be a?^100a^100 and this took between a second or two to match.  We tested extensively on the subset of the regular expression language implemented to show the success of this implementation, and the speed improvements are obvious.  Furthermore, this system is extensible, adding new components is as simple as understanding how they would be represented in an NFA, and using defhandlers to appropriately delegate work.
